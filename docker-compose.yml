@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  ollama:
+    build:
+      context: ./ollama
+      dockerfile: ./Dockerfile.ollama
+    environment:
+      - CUDA_VISIBLE_DEVICES=1
+    cpus: 0.6
+    mem_limit: 32g
+    volumes:
+      - ollama-data:/root/.ollama
+      - ./ollama/custom_models:/custom_models
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+  openwebui:
+    build:
+      context: ./openwebui/
+      dockerfile: ./Dockerfile.openwebui
+    environment:
+      - CUDA_VISIBLE_DEVICES=1
+    volumes:
+      - open-webui:/app/backend/data
+    ports:
+      - "3000:8080"
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+volumes:
+  open-webui:
+  ollama-data:
+    

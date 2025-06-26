@@ -9,6 +9,8 @@ services:
       - CUDA_VISIBLE_DEVICES=1
     cpus: 0.6
     mem_limit: 32g
+    networks:
+      - chatbot
     volumes:
       - ollama-data:/root/.ollama
       - ./ollama/custom_models:/custom_models
@@ -30,6 +32,8 @@ services:
       - open-webui:/app/backend/data
     ports:
       - "3000:8080"
+    networks:
+      - chatbot
     restart: unless-stopped
     deploy:
       resources:
@@ -40,3 +44,9 @@ volumes:
   open-webui:
   ollama-data:
     
+
+
+networks:
+  chatbot:
+    external: true
+    name: chatbot

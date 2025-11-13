@@ -90,7 +90,9 @@
 	};
 
 	onMount(async () => {
-		checkForVersionUpdates();
+		if ($config?.features?.enable_version_update_check) {
+			checkForVersionUpdates();
+		}
 
 		await Promise.all([
 			(async () => {
@@ -116,11 +118,11 @@
 		updateHandler();
 	}}
 >
-	<div class="mt-0.5 space-y-3 overflow-y-scroll scrollbar-hidden h-full">
+	<div class="space-y-3 overflow-y-scroll scrollbar-hidden h-full">
 		{#if adminConfig !== null}
 			<div class="">
 				<div class="mb-3.5">
-					<div class=" mb-2.5 text-base font-medium">{$i18n.t('General')}</div>
+					<div class=" mt-0.5 mb-2.5 text-base font-medium">{$i18n.t('General')}</div>
 
 					<hr class=" border-gray-100 dark:border-gray-850 my-2" />
 
@@ -137,16 +139,18 @@
 										v{WEBUI_VERSION}
 									</Tooltip>
 
-									<a
-										href="https://github.com/open-webui/open-webui/releases/tag/v{version.latest}"
-										target="_blank"
-									>
-										{updateAvailable === null
-											? $i18n.t('Checking for updates...')
-											: updateAvailable
-												? `(v${version.latest} ${$i18n.t('available!')})`
-												: $i18n.t('(latest)')}
-									</a>
+									{#if $config?.features?.enable_version_update_check}
+										<a
+											href="https://github.com/open-webui/open-webui/releases/tag/v{version.latest}"
+											target="_blank"
+										>
+											{updateAvailable === null
+												? $i18n.t('Checking for updates...')
+												: updateAvailable
+													? `(v${version.latest} ${$i18n.t('available!')})`
+													: $i18n.t('(latest)')}
+										</a>
+									{/if}
 								</div>
 
 								<button
@@ -160,15 +164,17 @@
 								</button>
 							</div>
 
-							<button
-								class=" text-xs px-3 py-1.5 bg-gray-50 hover:bg-gray-100 dark:bg-gray-850 dark:hover:bg-gray-800 transition rounded-lg font-medium"
-								type="button"
-								on:click={() => {
-									checkForVersionUpdates();
-								}}
-							>
-								{$i18n.t('Check for updates')}
-							</button>
+							{#if $config?.features?.enable_version_update_check}
+								<button
+									class=" text-xs px-3 py-1.5 bg-gray-50 hover:bg-gray-100 dark:bg-gray-850 dark:hover:bg-gray-800 transition rounded-lg font-medium"
+									type="button"
+									on:click={() => {
+										checkForVersionUpdates();
+									}}
+								>
+									{$i18n.t('Check for updates')}
+								</button>
+							{/if}
 						</div>
 					</div>
 
@@ -274,7 +280,7 @@
 				</div>
 
 				<div class="mb-3">
-					<div class=" mb-2.5 text-base font-medium">{$i18n.t('Authentication')}</div>
+					<div class=" mt-0.5 mb-2.5 text-base font-medium">{$i18n.t('Authentication')}</div>
 
 					<hr class=" border-gray-100 dark:border-gray-850 my-2" />
 
@@ -284,7 +290,7 @@
 							<select
 								class="dark:bg-gray-900 w-fit pr-8 rounded-sm px-2 text-xs bg-transparent outline-hidden text-right"
 								bind:value={adminConfig.DEFAULT_USER_ROLE}
-								placeholder="Select a role"
+								placeholder={$i18n.t('Select a role')}
 							>
 								<option value="pending">{$i18n.t('pending')}</option>
 								<option value="user">{$i18n.t('user')}</option>
@@ -393,6 +399,26 @@
 								>{$i18n.t("'s', 'm', 'h', 'd', 'w' or '-1' for no expiration.")}</span
 							>
 						</div>
+
+						{#if adminConfig.JWT_EXPIRES_IN === '-1'}
+							<div class="mt-2 text-xs">
+								<div
+									class=" bg-yellow-500/20 text-yellow-700 dark:text-yellow-200 rounded-lg px-3 py-2"
+								>
+									<div>
+										<span class=" font-medium">{$i18n.t('Warning')}:</span>
+										<span
+											><a
+												href="https://docs.openwebui.com/getting-started/env-configuration#jwt_expires_in"
+												target="_blank"
+												class=" underline"
+												>{$i18n.t('No expiration can pose security risks.')}
+											</a></span
+										>
+									</div>
+								</div>
+							</div>
+						{/if}
 					</div>
 
 					<div class=" space-y-3">
@@ -581,7 +607,7 @@
 												</div>
 											</div>
 											<div class="flex justify-between items-center text-xs">
-												<div class=" font-medium">Validate certificate</div>
+												<div class=" font-medium">{$i18n.t('Validate certificate')}</div>
 
 												<div class="mt-1">
 													<Switch bind:state={LDAP_SERVER.validate_cert} />
@@ -611,7 +637,7 @@
 				</div>
 
 				<div class="mb-3">
-					<div class=" mb-2.5 text-base font-medium">{$i18n.t('Features')}</div>
+					<div class=" mt-0.5 mb-2.5 text-base font-medium">{$i18n.t('Features')}</div>
 
 					<hr class=" border-gray-100 dark:border-gray-850 my-2" />
 
